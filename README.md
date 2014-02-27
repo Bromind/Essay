@@ -18,3 +18,16 @@ The most successful privacy solution offered today is Tor. Please do not propose
 
 There are no strict requirements regarding the structure of the essay. You can either for a short idea paper (kind of like this) or for a more complete architecture description (kind of like this). Needless to say, we do not expect you to produce a complete or error-free solution. Just try to put forward your own ideas, not an existing solution.
 
+Compile
+=======
+
+Required latex packages by default (you can remove some of them like todonotes) : 
+amsmath
+amsthm
+algorithm2e
+todonotes
+fancyhdr
+
+run 
+    pdflatex Essay.tex
+or download Essay.pdf
