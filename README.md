@@ -28,6 +28,8 @@ algorithm2e
 todonotes
 fancyhdr
 
-run 
+run:
+    
     pdflatex Essay.tex
+    
 or download Essay.pdf
