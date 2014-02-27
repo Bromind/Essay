@@ -1,0 +1,537 @@
+Multiple paths to transmit private data
+Good scalable method to protect data and preserve anonymity.
+Martin Vassor
+December 22, 2013
+Abstract
+The idea is to divide a given message into small pieces in such a way
+that all are needed to recompose the message. Then, we send all these
+pieces to the receiver through different paths. Thus, an observer wouldn’t
+be able to know if he catches all the pieces. Moreover, we want the
+method to guarantee anonymity of the sender. First, we will propose a
+formal definition of privacy. Then how to strongly decompose a message.
+After that, we will see which modifications in OSI model are needed. Last
+but not least, we will see the impact on security protocols.
+
+1
+1.1
+
+Introduction
+What is ’privacy’ ?
+
+Common definition : There are two types of data. First public data, and the
+other is private data. Most of the time, we consider that a data is private when
+it only a few people can access it, and it is public when most of the population
+can access it. However, this definition is quite unprecise, where is the limit ?
+Well, to find a good definition, we should first define what we are working on.
+Formal Definition : We are working on a set of n people {p1 , p2 , . . . , pn }.
+Let’s say that this set forms a universe U = {pi , ∀i ∈ [1, n]}. Moreover,
+the privacy depends on the data. Thus, we can define a logical proposition
+private(data) which indicate if the given data is private. As we have seen before,
+people should either be able to access the data or not. We can thus partition
+U into two subsets. First, a subset A which contains people who should access
+the data, and a set B which contains people who should not access the data.
+Obviously, the partitionning depends on the data, some people can only access
+some datas. Then, we have a function partition(data) which returns A and
+B. We can now formally define private(data) following the idea that a data is
+public if and only if everybody is authorized to access it.
+private(data) ⇔ ∀pi ∈ U : pi ∈ A
+A few quite useless properties : We have the following properties :
+U =A∪B
+
+1
+
+(1.1)
+
+2. DECOMPOSITION METHOD
+
+—Draft—
+
+⇔ A = U \B ⇔ A = B
+(1.1) ⇔ ¬∃pi ∈ U : ¬(pi ∈ A)
+
+1.2
+
+⇔ private(data) ⇔ ¬∃pi ∈ U : pi ∈ B
+
+(1.2)
+
+⇔ private(data) ⇔ B = ∅
+
+(1.3)
+
+What means ’respect privacy’ ?
+
+A data is private if there exists someone who should not access that data. But
+sometime a person can access a data even if he should not. For instance secret
+services try to get information they are not concerned by. Thus the concept
+of respecting privacy. We can say that the privacy is respected if and only if
+only people that access the data are allowed. More formally, in addition to U ,
+A and B as above, we can define A and B as the set of people that indeed
+access and respectively not access the data. Thus, the privacy is respected if
+all persons that access the data are allowed. Notice that do not mean that
+all allowed person indeed access the data. As above, we define the proposition
+respectP rivacy(data) which indicate if the privacy of the data is respected.
+respectP rivacy(data) ⇔ ∀pi ∈ A : pi ∈ A
+
+(1.4)
+
+(1.4) ⇔ A ⊆ A
+⇔B⊆B
+
+1.3
+
+(1.5)
+
+Concept of ’complete privacy’
+
+Even if an external observer1 can not deduce the data from a message, if it knows
+that the message exists, it can deduce implicits information, such that the fact
+that the transmiter try to communicate with the receiver. And sometimes, it
+is necessary that these persons remains anonymous. We define the concept of
+’complete privacy’ as the fact than we can not deduce any information about the
+transmiter and the receiver when observing the message, whenever or wherever
+we observe it. That is, we have a complete privacy when we guarantee both
+privacy as seen above, and anonymity.
+
+2
+2.1
+
+Decomposition method
+Introduction :
+
+The idea is to use the power of collectivity in a network to hide and cipher the
+data. To achieve that, Alice will ’xor-decompose’ its message into m submessages. Then she will send all that stuff to Bob using different paths. Then Bob
+just have to xor all the submessages to recompose the original message.
+1 An external observer is a person which should not access the data. p is an external
+e
+observer if and only if pe ∈ B
+
+CC
+
+BY:
+
+C
+
+2
+
+2. DECOMPOSITION METHOD
+
+2.2
+
+—Draft—
+
+Xor decomposition :
+
+Motivation : The Xor decomposition is an easy way to divide a message into
+submessages. It is very similar than a simple xor encrypting, where Alice and
+Bob both have to know a secret key, but with that method, there is no difference
+between the key and the cyphered text. Moreover, it is possible to have as much
+submessage as we want without compromise the privacy, because all submessage
+are needed to uncypher the original message.
+How to find a xor decomposition ? Let a be a sequence of n bits, and m the
+desired number of terms for the decomposition. We want to find {a1 , a2 , . . . , am }
+such that
+a = a1 ⊕ a2 ⊕ · · · ⊕ am
+(2.1)
+Finding such ai -s is easy, and there are multiple ways. For instance, Alice may
+create m − 1 random sequences of size n. Then compute
+am = a ⊕ a1 ⊕ a2 ⊕ · · · ⊕ am−1
+
+(2.2)
+
+To reconstruct a. Bob just have to xor-sum all ai .
+Proof of correctness :
+(2.2) ⇔ am = a ⊕ a1 ⊕ a2 ⊕ · · · ⊕ am−1
+⇔ am ⊕ a = a1 ⊕ a2 ⊕ · · · ⊕ am−1
+⇔ a = ⊕a1 ⊕ a2 ⊕ · · · ⊕ am−1 ⊕ am
+
+Algorithm: Xor-decompose
+Data: a - The sequence to decompose
+Result: A - An array of size m containing all ai
+A = Array of size m;
+am = a;
+for i from 1 to m − 1 do
+ai ← RandomOfSize(n);
+A[i] ← ai ;
+am ← am ⊕ ai
+end
+
+Algorithm: Xor-assemble
+Data: A - The array of received data
+Result: a - The original message
+n = A.length a = A[1] for i from 2 to n do
+a ← a ⊕ A[i]
+end
+Pseudo-code
+
+CC
+
+BY:
+
+C
+
+3
+
+3. COMPLETE SENDER PATTERN
+
+3
+
+—Draft—
+
+Complete sender pattern
+
+A complete picture is printed in page 5
+
+3.1
+
+Application layer :
+
+Formatting the message : The application layer changes a lot. Indeed, it
+has to decompose the given message into submessages. As we have seen, the
+source address has to be into the data. That is why the application layer must
+have a reading access to that information. Then, the message is formatted.
+Decomposing the message : Moreover, the application layer xor-decompose
+the message. Then it transmit all the submessages to the transport layer.
+Port : When handshaking, Alice have to send to a default port. Then, Bob
+will dedicate a socket for the connection. Then Alice should send to the new
+port.
+
+3.2
+
+The transport Layer :
+
+The transport protocol is just a UDP protocol.
+
+3.3
+
+Network Layer :
+
+Routing : The routing algorithm should trace the whole route of the packet,
+instead of just choosing the next hop. Designing such an algorithm with an
+acceptable running time is hard and exceeds this essay. Indeed, the algorithm
+should not only choose a good-enough path, but it should also change the path
+each time.
+Network header : In fact, there is not a network header, but a stack of
+headers. One for each node of the choosed path.
+
+4
+
+Complete receiver pattern
+
+A complete picture is printed in page 7
+
+4.1
+
+Network Layer :
+
+When receiving a packet : If the header stack contains only one element,
+the packet is for Bob. Thus decapsulate the packet, and pass it to the transport
+layer. Otherwise, remove the top header, and forward the packet.
+
+4.2
+
+Transport Layer :
+
+It is just a UDP protocol.
+
+CC
+
+BY:
+
+C
+
+4
+
+4. COMPLETE RECEIVER PATTERN
+
+—Draft—
+
+Message
+
+Application Layer
+
+src address
+
+src address
+src address
+
+Partial
+Message
+
+Partial
+Message
+
+Transport Layer
+dst port
+
+src address
+
+src address
+
+Partial
+Message
+
+Partial
+Message
+
+src address
+
+Network Layer
+Header Stack
+
+Header Stack
+
+dst port
+
+dst port
+
+src address
+
+src address
+
+Partial
+Message
+
+Partial
+Message
+
+Figure 1: Pattern of modified OSI, sender side.
+
+5
+
+CC
+
+BY:
+
+C
+
+Routing
+algorithm
+
+dst port
+
+5. RESISTANCE TO ATTACKS :
+
+4.3
+
+—Draft—
+
+Application Layer :
+
+On default port : When receiving a set of messages on the default port, Bob
+should xor-compose them. If it makes sense (i.e.: if it is a valid handshake),
+Bob should open a new socket, dedicated to the connection with Alice. Then
+he acknoledge from that socket.
+On a dedicated port : Then, Bob should wait and compose until the message make sense. Indeed, since submessages goes through different paths, the
+RTT might be different. If the validity time is over, Bob drops the concerned
+submessage.
+
+5
+5.1
+
+Resistance to attacks :
+Settings :
+
+We suppose to be in a huge enough network, such that an observer can not
+observe on all links of the network.
+
+5.2
+
+Eve :
+
+For huge enough networks, Eve can do nothing. Indeed, to uncypher the message, one must have all the message from Alice to Bob. But Eve cannot even
+knows if a message she intercepts come from Alice or not. That is why, even if
+she catch all the messages, she cannot knonws that she has all the message.
+
+5.3
+
+Mallory :
+
+Modification : Mallory can modify some bits of the message. Nevertheless, as
+Eve, she doesn’t know what to modify. Then, Mallory’s modification are similar
+to noise of a channel. Then we can use usual error detection and correction.
+Reordering : Reordering has no sense. Usually, we reorder to cause an action. Here, Mallory doesn’t know what message cause which action. To same
+submessage can cause different actions if the other submessages are different.
+And even if Mallory wants to reorder messages, she has to catch and re-send
+all messages. And Alice may include in the data of the message order number,
+etc...
+
+6
+6.1
+
+Limitations :
+Network size :
+
+The method above should work well on huge networks. Nevertheless, on small
+network, it is easy for a single person to observe all links.
+
+CC
+
+BY:
+
+C
+
+6
+
+6. LIMITATIONS :
+
+—Draft—
+
+HDS=Handshake
+
+If correct
+
+HDS
+
+ACK
+
+Application Layer
+
+src address
+
+src address
+
+src address
+
+src address
+
+Partial
+HDS
+
+Partial
+HDS
+
+Partial
+ACK
+
+Partial
+ACK
+
+Connection #i Socket
+
+Default Socket
+
+Transport Layer
+UDP Header
+
+UDP Header
+
+UDP Header
+
+UDP Header
+
+src address
+
+src address
+
+src address
+
+src address
+
+Partial
+HDS
+
+Partial
+HDS
+
+Partial
+ACK
+
+Partial
+ACK
+
+Network Layer
+Header Stack
+
+Header Stack
+
+Header Stack
+
+Header Stack
+
+UDP Header
+
+UDP Header
+
+UDP Header
+
+UDP Header
+
+src address
+
+src address
+
+src address
+
+src address
+
+Partial
+HDS
+
+Partial
+HDS
+
+Partial
+ACK
+
+Partial
+ACK
+
+Figure 2: Pattern of modified OSI, receiver side, when handshaking
+
+CC
+
+BY:
+
+C
+
+7
+
+7. CONCLUSION
+
+6.2
+
+—Draft—
+
+Isolated end-system :
+
+Even on huge networks, if an observer wants to focus on one particular person,
+it is easy for the observer to catch all the messages coming in and out of this
+end-system. By comparing them, he can deduce messages produced by this
+particular end-system. And then the data. Nevertheless, we can cypher the
+data before xor-decomposing it, which reduce the risk of data leak.
+
+7
+7.1
+
+Conclusion
+Privacy :
+
+By using multipath messages, we use the size of the network to preserve the
+privacy of users. We use the fact that all pieces of message are needed to understand every part of the message. This is achieved by the Xor-decomposition,
+and multipath routing (i.e.: Header stacks).
+
+7.2
+
+Anonymity :
+
+To guarantee anonymity, the source address is not in the headers, which are not
+cyphered. This is achieved by the format of Network headers.
+
+7.3
+
+Resistance against attacks :
+
+The method improves the resistance, even if it is not its primary goal. We
+can still apply error detection and correction on the data, just as cryptography
+methods on the original plain text.
+
+CC
+
+BY:
+
+C
+
+8
+
+

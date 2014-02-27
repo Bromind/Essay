@@ -1,0 +1,396 @@
+\documentclass[a4paper, onecolumn, 10pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amsthm}
+\numberwithin{equation}{section}
+
+\usepackage{algorithm2e}
+\usepackage{todonotes}
+%\usepackage{tikz}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyfoot[C]{\thepage}
+\fancyhead[R]{Revised version 1.1}
+%\fancyfoot[R]{\includegraphics[scale=0.8]{by-sa_small.png}}
+
+\title{Multiple paths to transmit private data\\\large{Scalable method to improve privacy and preserve anonymity.}}
+\author{Martin \textsc{Vassor}}
+
+\widowpenalty=10000
+\clubpenalty=10000
+\raggedbottom
+
+
+
+
+\begin{document}
+
+\newcommand{\figref}[1]{\textsc{Fig.}\ref{#1} p.\pageref{#1}}
+\newtheorem{plop}{Rule}
+
+\maketitle
+\begin{abstract}
+The idea is to divide a given message into small pieces in such a way that all are needed to recompose the message. Then, we send all these pieces to the receiver through different paths. Thus, an observer wouldn't be able to know if he catches all the pieces. Moreover, we want the method to guarantee anonymity of the sender. First, we will propose a formal definition of privacy. Then how to strongly decompose a message. After that, we will see which modifications in OSI model are needed. Last but not least, we will see the impact on security protocols. 
+\end{abstract}
+
+\section{Introduction}
+\subsection{What is 'privacy' ?}
+\paragraph{Common definition :}
+There are two types of data. Public data on one hand, and private data on the other hand. Most of the time, we consider that a data is private when it only a few people can access it, and it is public when most of the population can access it. However, this definition is quite unprecise, where is the limit ? Well, to find a good definition, we should first define what we are working on. 
+\paragraph{Formal Definition :}
+We are working on a set of $n$ people $\{p_1,\ p_2,\ \dots\ , p_n\}$. Let's say that this set forms a universe $U=\{p_i,\ \forall i \in [1, n]\}$. Moreover, the privacy depends on the data. Thus, we can define a logical proposition $private(data)$ which indicate if the given data is private. As we have seen before, people should either be able to access the data or not. We can thus partition $U$ into two subsets. First, a subset $A$ which contains people who should access the data, and a set $B$ which contains people who should not access the data. Obviously, the partitionning depends on the data, some people can only access some datas. Then, we have a function $partition(data)$ which returns $A$ and $B$. We can now formally define $private(data)$ following the idea that a data is public if and only if everybody is authorized to access it.
+\begin{equation} \label{eq:privateDef1}
+  \boxed{private(data)\Leftrightarrow\forall p_i \in U:p_i \in A}
+\end{equation}
+\paragraph{A few quite useless properties :}
+We have the following properties :
+$$U=A\cup B$$
+$$\Leftrightarrow A=U\backslash B\Leftrightarrow A=\overline{B}$$
+$$\eqref{eq:privateDef1}\Leftrightarrow\neg\exists p_i \in U:\neg(p_i \in A)$$
+\begin{equation}
+  \Leftrightarrow \boxed{private(data)\Leftrightarrow\neg\exists p_i \in U:p_i\in B}
+\end{equation}
+\begin{equation}
+  \Leftrightarrow \boxed{private(data)\Leftrightarrow B=\emptyset}
+\end{equation}
+\subsection{What means 'respect privacy' ?}
+A data is private if there exists someone who should not access that data. But sometime a person can access a data even if he should not. For instance secret services try to get information they are not concerned by. Thus the concept of respecting privacy. We can say that the privacy is respected if and only if only people that access the data are allowed. More formally, in addition to $U$, $A$ and $B$ as above, we can define $A^\prime$ and $B^\prime$ as the set of people that indeed access and respectively not access the data. Thus, the privacy is respected if all persons that access the data are allowed. Notice that do not mean that all allowed person indeed access the data. As above, we define the proposition $respectPrivacy(data)$ which indicate if the privacy of the data is respected.
+\begin{equation} \label{eq:respectDef1}
+  \boxed{respectPrivacy(data)\Leftrightarrow\forall p_i\in A^\prime:p_i\in A}
+\end{equation}
+$$\eqref{eq:respectDef1}\Leftrightarrow A^\prime\subseteq A$$
+\begin{equation} \label{eq:respectDef2}
+  \boxed{\Leftrightarrow B\subseteq B^\prime}
+\end{equation}
+\subsection{Concept of 'complete privacy'}
+Even if an external observer\footnote{An external observer is a person which should not access the data. $p_e$ is an external observer if and only if $p_e \in B$} can not deduce the data from a message, if it knows that the message exists, it can deduce implicits information, such that the fact that the transmiter try to communicate with the receiver. And sometimes, it is necessary that these persons remains anonymous. We define the concept of 'complete privacy' as the fact than we can not deduce any information about the transmiter and the receiver when observing the message, whenever or wherever we observe it. That is, we have a complete privacy when we guarantee both privacy as seen above, and anonymity.
+
+\section{Decomposition method}
+\subsection{Introduction :} The idea is to use the power of collectivity in a network to hide and cipher the data. To achieve that, Alice will 'xor-decompose' its message into $m$ submessages. Then she will send all that stuff to Bob using different paths. Then Bob just have to xor all the submessages to recompose the original message. 
+\subsection{Xor decomposition :}
+\paragraph{Motivation :}
+The Xor decomposition is an easy way to divide a message into submessages. It is very similar than a simple xor encrypting, where Alice and Bob both have to know a secret key, but with that method, there is no difference between the key and the cyphered text. Moreover, it is possible to have as much submessage as we want without compromise the privacy, because all submessage are needed to uncypher the original message.
+\paragraph{How to find a xor decomposition ?}
+Let $a$ be a sequence of $n$ bits, and $m$ the desired number of terms for the decomposition. We want to find $\{a_1,\ a_2,\ \dots, a_m\}$ such that 
+\begin{equation} \label{eq:xorDecomposition}
+  a=a_1\oplus a_2\oplus\dots\oplus a_m
+\end{equation}
+Finding such $a_i$-s is easy, and there are multiple ways. For instance, Alice may create $m-1$ random sequences of size $n$. Then compute 
+\begin{equation} \label{eq:findAM}
+  a_m = a\oplus a_1\oplus a_2\oplus\dots\oplus a_{m-1}
+\end{equation}
+To reconstruct $a$. Bob just have to xor-sum all $a_i$.
+\paragraph{Proof of correctness :}
+$$\eqref{eq:findAM} \Leftrightarrow a_m = a\oplus a_1\oplus a_2\oplus\dots\oplus a_{m-1}$$
+$$\Leftrightarrow a_m\oplus a = a_1\oplus a_2\oplus\dots\oplus a_{m-1}$$
+$$\Leftrightarrow a = \oplus a_1\oplus a_2\oplus\dots\oplus a_{m-1}\oplus a_m$$
+\paragraph{Pseudo-code}
+\begin{algorithm}[ht]
+  \TitleOfAlgo{Xor-decompose}
+  \SetAlgoLined
+  \KwData{$a$ - The sequence to decompose}
+  \KwResult{$A$ - An array of size $m$ containing all $a_i$}
+  $A$ = Array of size $m$\;
+  $a_m$ = $a$\;
+  \For{$i$ from $1$ to $m-1$}{
+    $a_i$ $\leftarrow$ RandomOfSize($n$)\;
+    A[i] $\leftarrow$ $a_i$\;
+    $a_m$ $\leftarrow$ $a_m\oplus a_i$
+    }
+  \end{algorithm}
+  \begin{algorithm}[ht]
+  \TitleOfAlgo{Xor-assemble}
+  \SetAlgoLined
+  \KwData{$A$ - The array of received data}
+  \KwResult{$a$ - The original message}
+  $n$ = $A.length$
+  $a$ = $A[1]$
+  \For{$i$ from $2$ to $n$}{$a$ $\leftarrow$ $a\oplus A[i]$}
+\end{algorithm}
+% \subsection{Paths :}
+% \paragraph{Motivation :} In my opinion, the main problem of the current architecture of the Internet comes with the routing procedure we use. Indeed, the route a packet follows is unique. Thus it is really easy for someone to catch, see, and/or modify a packet.But if we divide the message into multiple pieces, and send all of them throught a different route, we increase the probability for a single piece to be catched, but we decrease the probability for all pieces to be catched. If the message division we use guarantee that all pieces are needed to uncypher the message, then reducing the probability for all pieces to be catch directly implies reducing the probability for the message to be uncyphered. The problem when increasing the number of route, is that it also increase the delay. In this section, I will only describe how to transmit packets througth multiple paths. An analysis will be done in the next section. Here, our goal is to find a good compromise between the time needed and the probability to be uncyphered. Notice that a transmitter have to make a choice between these two criterias, and can not expect to have both a low delay and a high probability to be uncyphered.
+% \paragraph{Assumptions:} We suppose that Alice can decide the path of each piece. This last assumption implies some modifications in the IP Protocol, which are detailled below. 
+% \paragraph{What is our goal ?} We are given a set $M$ of $n$ pieces of message $M=\{m_1,\ m_2,\dots,\ m_n\}$. Since all the pieces are equivalent\footnote{They are equivalent means that they have the same size, and the same 'amount of information'. That implies that an external observer don't learn anything more depending on which piece he can access to.}, it doesn't matter which piece we send on which path. In a computer network (for instance internet), computer are linked together by routers. Routers and computers are linked by segments. Then a path $P$ between Alice and Bob is a set of $l$ segments $P=\{s_1,\ s_2,\dots,\ s_l\}$ such that there is a unique segment from Alice to the network, a unique segment from the network to Bob, and for each router $r$ in the network, there is either 2 or 0 segments which link $r$ to the rest of the network\footnote{Such a definition guarantees no cycling paths. To allowed cycling path, each router must have an even number of segments.}. Our goal is to find $n$ paths as different as possible, i.e. to find a set $S$ of $n$ paths $$S=\{P_1,\ P_2,\dots,\ P_n\}$$$$=\left\{ \{s_{1.1},\dots,\ s_{1.l_1}\} ,\dots,\ \{s_{n.1},\dots,\ s_{n.l_n}\}\right\}$$ We don't care about the the time.
+% 
+% \paragraph{Probabilities :} 
+% \subparagraph{Notations :}
+% We use the following notations:
+% $$S(x):\ "Transmission\ successful\ through\ x"$$
+% $$F(x):\ "Transmission\ failed\ through\ x"$$
+% $$S(X)=\overline{F(X)}$$
+% To transmit successfully a message means that it is not catched by a observer. 
+% Notice that $x$ may be either a segment, a path, or a set of paths.
+% To reduce the length of the expressions, we also use the following notations:
+% $$p_s(x)=p(S(x))$$
+% $$p_f(X)=p(F(x))$$
+% $$p_s(x)=1-p_f(x)$$
+% 
+% \subparagraph{Probability for a path to be observed:}
+% The path is not cyclic, so all the segments are different. Then, the probability to successfully transmit a message across a path $P=\{s_i,\ i\in[0,n]\}$ is $$p_s(P)=\prod_{i=0}^n p_s(s_i)$$
+% \subparagraph{Probability for a set to be observed:}
+% While evaluating a single path is easy since all segments are disjoint, evaluating a set of path might be hard. Instead of having a way to compute directly the probability, we'll see two fondamental principles, and a few simplification rules. Nevertheless, I can not guarantee that these simplification rules always suffice. The proofs of correctness are putted in appendix. The two main rules are the following :
+% \begin{plop}
+%   We can combine two serial segments into one by multiplying success probabilities.
+% \end{plop}
+% \begin{plop}
+%   We can combine two parallel segments into one by multiplying failure probabilities.
+% \end{plop}
+% \subparagraph{Conclusion :}
+% Basically, computing the probability of success through a network may be hard. Nevertheless, we can compute step by step by combining paths.
+% 
+% 
+% \paragraph{Finding a set of paths with a given probability of success}
+% \subparagraph{To hard for us :}Finding a set of path in an optimal way is really hard. 
+% \subparagraph{Method to find the optimal set of path :}The method given above is recursive, and thus quite expensive. Nevertheless, with a dynamic programming implementation, it must runs fast enough. The idea is to find the best path $P$, and then if it is not good enough, try to optimize part of the path. To achieve that, we try to find the best path with $n$ commom links, for $n$ from $0$ to $length(P)-1$. And then do that recursively, until the targeted probability is achieved.
+% \subparagraph{Finding the best path :}With a kind of Dijkstra algorithm, it is really easy to find it. Nevertheless, one should take care, because we don't have to add weight, but to multiply probabilities. 
+% \subparagraph{Remove links :}This is the expensive part, nevertheless, it is easy to parallelize it. 
+
+\section{Complete sender pattern}
+A complete picture is printed in page \pageref{fig:OSImodified}
+\subsection{Application layer :}
+\paragraph{Formatting the message :}
+The application layer changes a lot. Indeed, it has to decompose the given message into submessages. As we have seen, the source address has to be into the data. That is why the application layer must have a reading access to that information. Then, the message is formatted. 
+\paragraph{Decomposing the message :}
+Moreover, the application layer xor-decompose the message. Then it transmit all the submessages to the transport layer.
+\paragraph{Port :}
+When handshaking, Alice have to send to a default port. Then, Bob will dedicate a socket for the connection. Then Alice should send to the new port.
+\subsection{The transport Layer :}
+The transport protocol is just a UDP protocol.
+\subsection{Network Layer :}
+\paragraph{Routing :}
+The routing algorithm should trace the whole route of the packet, instead of just choosing the next hop. Designing such an algorithm with an acceptable running time is hard and exceeds this essay. Indeed, the algorithm should not only choose a good-enough path, but it should also change the path each time. 
+\paragraph{Network header :}
+In fact, there is not a network header, but a stack of headers. One for each node of the choosed path.
+\begin{figure}
+  \centering
+  \begingroup
+  \tikzset{every picture/.style={scale=0.8}}
+  \input{OSI.tex}
+  \endgroup
+  \caption{Pattern of modified OSI, sender side.}
+  \label{fig:OSImodified}
+\end{figure}
+
+\section{Complete receiver pattern}
+A complete picture is printed in page \pageref{fig:OSImodified2}
+\subsection{Network Layer :}
+\paragraph{When receiving a packet :}
+If the header stack contains only one element, the packet is for Bob. Thus decapsulate the packet, and pass it to the transport layer. Otherwise, remove the top header, and forward the packet. 
+\subsection{Transport Layer :}
+It is just a UDP protocol.
+\subsection{Application Layer :}
+\paragraph{On default port :}
+When receiving a set of messages on the default port, Bob should xor-compose them. If it makes sense (i.e.: if it is a valid handshake), Bob should open a new socket, dedicated to the connection with Alice. Then he acknoledge from that socket. 
+\paragraph{On a dedicated port :}
+Then, Bob should wait and compose until the message make sense. Indeed, since submessages goes through different paths, the RTT might be different. If the validity time is over, Bob drops the concerned submessage.
+\begin{figure}
+  \centering
+  \begingroup
+  \tikzset{every picture/.style={scale=0.8}}
+  \input{OSI_establishing.tex}
+  \endgroup
+  \caption{Pattern of modified OSI, receiver side, when handshaking}
+  \label{fig:OSImodified2}
+\end{figure}
+
+\section{Resistance to attacks :}
+\subsection{Settings :}
+We suppose to be in a huge enough network, such that an observer can not observe on all links of the network.
+\subsection{Eve :}
+For huge enough networks, Eve can do nothing. Indeed, to uncypher the message, one must have all the message from Alice to Bob. But Eve cannot even knows if a message she intercepts come from Alice or not. That is why, even if she catch all the messages, she cannot knonws that she has all the message. 
+\subsection{Mallory :}
+\paragraph{Modification :}
+Mallory can modify some bits of the message. Nevertheless, as Eve, she doesn't know what to modify. Then, Mallory's modification are similar to noise of a channel. Then we can use usual error detection and correction.
+\paragraph{Reordering :}
+Reordering has no sense. Usually, we reorder to cause an action. Here, Mallory doesn't know what message cause which action. To same submessage can cause different actions if the other submessages are different. And even if Mallory wants to reorder messages, she has to catch and re-send all messages. And Alice may include in the data of the message order number, etc...
+
+\section{Limitations :}
+\subsection{Network size :}
+The method above should work well on huge networks. Nevertheless, on small network, it is easy for a single person to observe all links. 
+\subsection{Isolated end-system :}
+Even on huge networks, if an observer wants to focus on one particular person, it is easy for the observer to catch all the messages coming in and out of this end-system. By comparing them, he can deduce messages produced by this particular end-system, and then the data. Nevertheless, we can cypher the data before xor-decomposing it, which reduce the risk of data leak.
+\subsection{IP address spoofing :}
+If the attacker knows the IP of the receiver, he can spoof it. Then we will send all data to the attacker. One should then take care to cypher the data before decompositing it.
+
+\section{Conclusion}
+\subsection{Privacy :}
+By using multipath messages, we use the size of the network to preserve the privacy of users. We use the fact that all pieces of message are needed to understand every part of the message. This is achieved by the Xor-decomposition, and multipath routing (i.e.: Header stacks).
+\subsection{Anonymity :}
+To guarantee anonymity, the source address is not in the headers, which are not cyphered. This is achieved by the format of Network headers.
+\subsection{Weaknesses :}
+\begin{description}
+  \item[Isolated End-systems] One should take care not to be isolated, but to multiply the number of links
+  \item[Only on wide networks] Otherwise, it is easy to monitor all links.
+  \item[Only a good-enough solution\footnote{Well, who can pretend to have a 100\% reliable system ?}] We can not guarantee that the data is not catched.
+\end{description}
+\subsection{Strong Points :}
+\begin{description}
+  \item[Shared Data] The sender and receiver doesn't need to share sensitive datas such as keys. 
+  \item[Scalability] The bigger the network is, the more potential paths there are, and the harder it is for and opponent to monitor all links.
+  \item[Few modification on current web architecture] We only need to modify the application layer and the network layer.
+  \item[Distributed system] There isn't a server which manages all exchanges, each sender manages its data.
+\end{description}
+
+
+\newpage
+\appendix 
+\section{Example}
+The following example shows an idea of implementation of the above method. We are given the network shown in \figref{fig:example0}.
+\begin{figure}[h]
+  \begin{center}
+    \input{Example0.tex}
+    \caption{Example on a small network}
+    \label{fig:example0}
+  \end{center}
+\end{figure}
+\subsection{Get receiver IP :}
+\paragraph{Directory IP :}
+To get Bob IP, Alice should ask a directory (a bit like a phone book). But, we assume Alice doesn't know anything, i.e. she doesn't even know the directory IP. To learn it, she just have to send a broadcast message\footnote{To limit the number of answer, Alice can set a short Time-to-Live.} asking for that IP. Alice obtain back a list of directories IPs (if people doesn't use the same IP). Alice now have a list of directories, but she deosn't know if these directories are corrupted or not. But, the bigger the network is, the more chance there are to have at least one correct directory. 
+\paragraph{Receiver IP :}
+Alice should ask for every directory Bob IP. If a directory is corrupted, it may return a wrong IP, but we assume that the network is wide enough such that Alice has at least one correct directory. Then Alice has a list of Bob address, with at least one correct. Alice just as to send to every address a message (using the decomposition method), asking for each receiver to authenticate (with usual methods for instance). Then Alice may know which of the received addresses is correct. Notice that we can imagine a system of feedbacks on the directories, and also, when Alice ask for an address, she can inform of its address, to complete the database of the directories.
+\subsection{Cypher the plain text :}
+Alice just cyphers the text with any existing method. For instance with RSA, getting Bob public key with a system similar to the directory above. She sends the cypher text to Bob. Bob uncyphers it.
+\subsection{Sending :}
+Alice send two submessages as shown in \figref{fig:example}, with one common link. Each link is associate with a probability of being monitored. To compute the global probability of success, we should reccursively merge serial and parallel links.
+\begin{figure}[h]
+  \begin{center}
+    \input{Example.tex}
+    \caption{Pathes Alice chooses}
+    \label{fig:example}
+  \end{center}
+\end{figure}
+\subsubsection{Merging serial links :}
+To catch a submessage, one should only catch it once. That is why successfully transmit a data over serial links is successfully transmit data on every link of the path. Then we can merge serial links by multiplying success probabilities. When applying that to the given network, we get the paths shown in \figref{fig:example2}.
+\begin{figure}[h]
+  \begin{center}
+    \input{Example2.tex}
+    \caption{We merge the serial links.}
+    \label{fig:example2}
+  \end{center}
+\end{figure}
+\subsubsection{Merging parallel links :}
+To get the whole message, an observer should get all submessages. That is, the transmission should fail on all separated links. Thus, to merge parallel links, we should multiply failure probability. In our example, we get the paths shown in \figref{fig:example3}
+\begin{figure}[h]
+  \begin{center}
+    \input{Example3.tex}
+    \caption{We merge parallel links.}
+    \label{fig:example3}
+  \end{center}
+\end{figure}
+\subsubsection{Merging serial links :}
+As above, we multiply success probabilities. We finally find that the transmission has a success probability around $22\%$ while the best path has a probability of $16\%$ ($0.4\times 0.8\times 0.5$). With only two paths, we improve the probability by approximatively $37\%$.
+
+\section{About this essay}
+\paragraph{Writing conditions :}This essay was written for the course of \textsc{Computer Networks} for second year students in computer science at EPFL, Switzerland. This course was given by Katerina \textsc{Argyraki}. 
+\paragraph{Aknoledgements :}
+First of all, I would like to thank Katerina \textsc{Argyraki}, who gives us the opportunity to try to write something, and who endures all our questions. I would also thank the readers of this essay, who report a lot of mistakes. 
+\paragraph{Sharing conditions :}This essay is distributed under Creative Commons BY-SA. Feel free to redistribute it under the same licence, with a credit to the original, and indicate the modifications.\newline
+\begin{flushright}
+\includegraphics[scale=0.8]{by-sa.png}
+\end{flushright}
+\paragraph{Contact :}
+If you have a remark, you can join me at $<$martin.vassor@epfl.ch$>$. 
+% \appendix
+% \section{Simplification rules :}
+% In this section, we will prove that some parts of graph are equivalent, i.e. we can replace each other as we want.
+% \subsection{Neutral element of a path :}
+% If $S$ is a success-path (i.e. $p_s(S)=1$). We will prove that the path $P_1$ on \figref{fig:simplepath} and the path $P_2$ on \figref{fig:pathneutralelement} are equivalent.
+% This is trivially true. The probability of success with the simple path is, by definition $p_s(P_1)=p_s(s_1)$. In the second case, we have $p_s(P_2)=p_s(S)\cdot p_s(s_1)=p_s(s_1)$.
+% \subsection{Combining two serial segments :}
+% Let $N_1$ be \figref{fig:serialSeg} and $N_2$ be \figref{fig:simplepath}. To achieve sending a message through $N_1$, we should both send it successfully through $s_1$ and $s_2$. Since segments in a path are disjoint, 
+% $$p_s(N_1)=p_s(s_1)\cdot p_s(s_2)$$
+% Then we can reduce two serial links into one by multiplying success probabilities.
+% \subsection{Combining two parallel segments :}
+% Let $N_1$ be \figref{fig:parallelSeg} and $N_2$ be \figref{fig:simplepath}. $p_f(x)$ is the probability the a message is catched when crossing $x$. To catch the message, we have to catch it through both $s_1$ and $s_2$. Thus, we have the following :
+% $$p_e(N_1)=p(E(P_1))=p(E(s_1\cap s_2))$$
+% Since a path contains disjoint elements, we have :
+% $$p_e(N_1)=p(E(s_1))\cdot p(E(s_2))$$
+% Thus, $$p_e(N_2)=p_e(s_1)\cdot p_e(s_2)$$
+% Then we can reduce two parallel segments into one by multiplying failure probabilities.
+% \subsection{Multiplying parallels :}
+% To transform a network $N_1$ like \figref{fig:bigPara} into a network $N_2$ like \figref{fig:smallPara}, we will compare both failure probabilities.
+% \subsubsection{In \figref{fig:bigPara} :}
+% We combine $s_1$ and $s_2$ together into $s_{1,2}$
+% $$p_s(s_{1,2})=p_s(s_1)\cdot p_s(s_2)$$
+% Then combining with the second rule :
+% $$p_f(N_1)=p_f(s_{1,2})\cdot p_f(s_3)$$
+% $$p_f(N_1)=(1-p_s(s_1)\cdot p_s(s_2))\cdot p_f(s_3)$$
+% \subsubsection{In \figref{fig:smallPara} :}
+% To fail, both $P_1$ and $P_2$ have to fail. Then :
+% $$p_f(N_2)=p_f(P_1)\cdot p_f(P_2)$$
+% $$p_f(N_2)=(1-p_s(P_1))\cdot (1-p_s(P_2))$$
+% $$p_f(N_2)=(1-p_s(S\cup s_3)) \cdot (1-p_s(s_1\cup s_2))$$
+% Since $S$ and $s_3$ are in serie and $s_1$ and $s_2$ too, using the first rule :
+% $$p_f(N_2)=(1-p_s(S)\cdot p_s(s_3))\cdot(1-p_s(s_1)\cdot p_s(s_2))$$
+% Since $p_s(S)=1$ :
+% $$p_f(N_2)=(1-p_s(s_3))\cdot(1-p_s(s_1)\cdot p_s(P_2))$$
+% $$p_f(N_2)=p_f(s_3)\cdot(1-p_s(s_1)\cdot p_s(P_2))$$
+% $$p_f(N_2)=p_f(N_1)$$
+% 
+% 
+% % Figures
+% \section{Figures :}
+% \begin{figure}[h]
+%   \begin{center}
+%     \input{ExampleNetwork.tex}
+%     \caption{Scheme of the network}
+%     \label{fig:networkScheme}
+%   \end{center}
+% \end{figure}
+% \begin{figure}[h]
+%   \begin{center}
+%     \input{SimplePath.tex}
+%     \caption{The simplest path}
+%     \label{fig:simplepath}
+%   \end{center}
+% \end{figure}
+% \begin{figure}[h]
+%   \begin{center}
+%     \input{NeutralElement.tex}
+%     \caption{A simple path with a neutral element equivalent to \figref{fig:simplepath}}
+%     \label{fig:pathneutralelement}
+%   \end{center}
+% \end{figure}
+% \begin{figure}
+%   \begin{center}
+%     \input{SerialCombination.tex}
+%     \caption{Two serial segments}
+%     \label{fig:serialSeg}
+%   \end{center}
+% \end{figure}
+% \begin{figure}
+%   \begin{center}
+%     \input{CombiningParallel.tex}
+%     \caption{Two parallel segments}
+%     \label{fig:parallelSeg}
+%   \end{center}
+% \end{figure}
+% \begin{figure}
+%   \begin{center}
+%     \input{BigParallel.tex}
+%     \caption{A more complicated network}
+%     \label{fig:bigPara}
+%   \end{center}
+% \end{figure}
+% \begin{figure}
+%   \begin{center}
+%     \input{SmallParallel.tex}
+%     \caption{A multiple parallel segment network with a secure chanel}
+%     \label{fig:smallPara}
+%   \end{center}
+% \end{figure}
+% \section{To Delete}
+% \todo{To delete}
+% \appendix
+% $$\begin{array}{cc}
+%   10/12 & 2h\\
+%   11/12 & 6h\\
+%   12/12 & 8h40\\
+%   16/12 & 5h\\
+%   21/12 & 6h\\
+%   22/12 & 7h30\\
+% \end{array}$$
+
+
+\end{document}
+
