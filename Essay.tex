@@ -10,7 +10,7 @@
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyfoot[C]{\thepage}
-\fancyhead[R]{Revised version 1.1}
+\fancyhead[R]{Revised version 1.2}
 %\fancyfoot[R]{\includegraphics[scale=0.8]{by-sa_small.png}}
 
 \title{Multiple paths to transmit private data\\\large{Scalable method to improve privacy and preserve anonymity.}}
@@ -221,7 +221,7 @@ To guarantee anonymity, the source address is not in the headers, which are not 
 \begin{description}
   \item[Isolated End-systems] One should take care not to be isolated, but to multiply the number of links
   \item[Only on wide networks] Otherwise, it is easy to monitor all links.
-  \item[Only a good-enough solution\footnote{Well, who can pretend to have a 100\% reliable system ?}] We can not guarantee that the data is not catched.
+  \item[Only a good-enough solution\protect\footnote{Well, who can pretend to have a 100\% reliable system ?}] We can not guarantee that the data is not catched. We can only give a bound to the probability to be catched.
 \end{description}
 \subsection{Strong Points :}
 \begin{description}
@@ -235,7 +235,7 @@ To guarantee anonymity, the source address is not in the headers, which are not 
 \newpage
 \appendix 
 \section{Example}
-The following example shows an idea of implementation of the above method. We are given the network shown in \figref{fig:example0}.
+The following example shows an idea of implementation of the above method. We are given the network shown in \figref{fig:example0}. Notice that the example gives an idea of a whole possible implementation while we only explained the multi-path idea.
 \begin{figure}[h]
   \begin{center}
     \input{Example0.tex}
@@ -245,11 +245,11 @@ The following example shows an idea of implementation of the above method. We ar
 \end{figure}
 \subsection{Get receiver IP :}
 \paragraph{Directory IP :}
-To get Bob IP, Alice should ask a directory (a bit like a phone book). But, we assume Alice doesn't know anything, i.e. she doesn't even know the directory IP. To learn it, she just have to send a broadcast message\footnote{To limit the number of answer, Alice can set a short Time-to-Live.} asking for that IP. Alice obtain back a list of directories IPs (if people doesn't use the same IP). Alice now have a list of directories, but she deosn't know if these directories are corrupted or not. But, the bigger the network is, the more chance there are to have at least one correct directory. 
+To get Bob IP, Alice should ask a directory (a bit like a phone book). But, we assume Alice doesn't know anything, i.e. she doesn't even know the directory IP. To learn it, she just have to send a broadcast message\footnote{To limit the number of answer, Alice can set a short Time-to-Live.} asking for that IP. Alice obtain back a list of directories IPs (if people doesn't use the same IP). Alice now have a list of directories, but she doesn't know if these directories are corrupted or not. But, the bigger the network is, the more chance there are to have at least one correct directory.
 \paragraph{Receiver IP :}
 Alice should ask for every directory Bob IP. If a directory is corrupted, it may return a wrong IP, but we assume that the network is wide enough such that Alice has at least one correct directory. Then Alice has a list of Bob address, with at least one correct. Alice just as to send to every address a message (using the decomposition method), asking for each receiver to authenticate (with usual methods for instance). Then Alice may know which of the received addresses is correct. Notice that we can imagine a system of feedbacks on the directories, and also, when Alice ask for an address, she can inform of its address, to complete the database of the directories.
-\subsection{Cypher the plain text :}
-Alice just cyphers the text with any existing method. For instance with RSA, getting Bob public key with a system similar to the directory above. She sends the cypher text to Bob. Bob uncyphers it.
+\subsection{Transform the plain text\protect\footnote{Before revision 1.2, this was named "Cypher the plain text".} :} 
+For any reason, Alice and Bob may want not to send the plain text. For instance, they may want to cypher the text (Notice that we doesn't gain anything in the transfer when cyphering), or to equilibrate zeros and ones, or whatever. Decomposing message doesn't prevent to do such transformation, but it decreases the benefits.
 \subsection{Sending :}
 Alice send two submessages as shown in \figref{fig:example}, with one common link. Each link is associate with a probability of being monitored. To compute the global probability of success, we should reccursively merge serial and parallel links.
 \begin{figure}[h]
