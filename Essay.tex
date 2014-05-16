@@ -161,6 +161,10 @@ The transport protocol is just a UDP protocol.
 The routing algorithm should trace the whole route of the packet, instead of just choosing the next hop. Designing such an algorithm with an acceptable running time is hard and exceeds this essay. Indeed, the algorithm should not only choose a good-enough path, but it should also change the path each time. 
 \paragraph{Network header :}
 In fact, there is not a network header, but a stack of headers. One for each node of the choosed path.
+\subparagraph{Sender's anonymity :}
+Notice that to preserve sender anonymity, headers should not contains sender IP. Each header may eventually contains IP of previous visited router. The sender's IP must be contained in the message core, which is decomposed.
+\subparagraph{Value of header stack :}
+When I first submitted that essay to Prof. \textsc{Argyraki}, she asked what is the purpose of included a network header for each intermediate node. The fact is that the more header we have, the easier it is to control the paths of each individual submessage. And then, the easier it is to garantee that submessages use different paths. If the stack was not present (for instance if we only provide one intermediate node), many submessages may use the same path, and then be easier to catch. If Alice decides all paths by herself, she could maximize different paths.
 \begin{figure}
   \centering
   \begingroup
